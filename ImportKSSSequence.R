@@ -4,7 +4,7 @@ source("ImportXMLKSS.R")
 fNames <- c("mitte", "nord", "ost", "süd",  "südost", "südwest", "west")
 folderNames <- paste0("./KSS2013_46/", fNames,"/")
 
-for(i in 6:length(folderNames)){
+for(i in 1:length(folderNames)){
     print(fNames[i])
     fileList <- list.files(folderNames[i], full.names = TRUE, pattern = ".xml$")
     tempTrainList <- list()
@@ -22,24 +22,7 @@ for(i in 6:length(folderNames)){
 
 
 
-#load(file="fullListRBNord.RData")
 
-fullList <- list()
-
-for(j in 1:length(fileList)){
-  loadName <- paste0("trainList_", folderName , j, ".RData")
-  load(file = loadName)
-  print(length(tempTrainList))
-  fullList <- c(fullList, tempTrainList)
-}
-
-for(k in 1: length(fullList)){
-  fullList[[k]] <- setRegionalB(fullList[[k]], folderName)
-}
-
-# fullList[300]
-
-save(fullList, file = paste0("trainListFull_", folderName, ".RData"))
 
 
 #########################################################################
@@ -103,4 +86,4 @@ for(i in 1:len){
     df$VZEstart[i] <- getVZEBegin(completeDList[[i]])
     df$VZEend[i] <- getVZEEnd(completeDList[[i]])
 }
-write.csv2(df, file = "./KSS2013_46/KSS2013_46-Gesamtdeutschland_v02.csv", row.names = F)
+write.csv2(df, file = "./KSS2013_46/KSS2013_46-Gesamtdeutschland_v04.csv", row.names = F)

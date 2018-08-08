@@ -105,33 +105,55 @@ importXMLKSSFile <- function(fileName){
         VTS_main <- "#"
         VZE_begin <- "#"
         VZE_end <- "#"
+        AddDays <- ""
+        ExclDays <- ""
         
         for(m in 1:length(timeframes)){
           beg <- xmlAttrs(timeframes[[m]])["startDate"]
-          ende <- xmlAttrs(timeframes[[m]])["endDate"]
-          for(v in 1:length(timeframes[[m]])){
-            if(xmlAttrs(timeframes[[m]][[v]])["dayType"] == "regularday"){
-              vt <- xmlAttrs(timeframes[[m]][[v]])["operatingCode"]
-              break()
+          if(!is.na(beg)){
+            ende <- xmlAttrs(timeframes[[m]])["endDate"]
+            for(v in 1:length(timeframes[[m]])){
+              if(xmlAttrs(timeframes[[m]][[v]])["dayType"] == "regularday"){
+                vt <- xmlAttrs(timeframes[[m]][[v]])["operatingCode"]
+                break()
+              }
+            }
+            if(VTS_main == "#"){
+              VTS_main <- vt
+            }else{
+              VTS_main <- paste(VTS_main, vt, sep = "#")
+            }
+            
+            if(VZE_begin == "#"){
+              VZE_begin <- beg
+            }else{
+              VZE_begin <- paste(VZE_begin, beg, sep = "#")
+            }
+            
+            if(VZE_end == "#"){
+              VZE_end <- ende
+            }else{
+              VZE_end <- paste(VZE_end, ende, sep = "#")
+            }
+          }else{
+            for(v in 1:length(timeframes[[m]])){
+              if(!is.na(xmlAttrs(timeframes[[m]][[v]])["type"]) && xmlAttrs(timeframes[[m]][[v]])["type"] == "include"){
+                if(AddDays == ""){
+                  AddDays <- xmlAttrs(timeframes[[m]][[v]])["date"]
+                }else{
+                  AddDays <- paste(AddDays, xmlAttrs(timeframes[[m]][[v]])["date"], sep = "#")
+                }
+              }
+              if(!is.na(xmlAttrs(timeframes[[m]][[v]])["type"]) && xmlAttrs(timeframes[[m]][[v]])["type"] == "exclude"){
+                if(ExclDays == ""){
+                  ExclDays <- xmlAttrs(timeframes[[m]][[v]])["date"]
+                }else{
+                  ExclDays <- paste(ExclDays, xmlAttrs(timeframes[[m]][[v]])["date"], sep = "#")
+                }
+              }
             }
           }
-          if(VTS_main == "#"){
-            VTS_main <- vt
-          }else{
-            VTS_main <- paste(VTS_main, vt, sep = "#")
-          }
           
-          if(VZE_begin == "#"){
-            VZE_begin <- beg
-          }else{
-            VZE_begin <- paste(VZE_begin, beg, sep = "#")
-          }
-          
-          if(VZE_end == "#"){
-            VZE_end <- ende
-          }else{
-            VZE_end <- paste(VZE_end, ende, sep = "#")
-          }
            
         }
         
@@ -140,7 +162,11 @@ importXMLKSSFile <- function(fileName){
         # Liste der Konstruktionsz?ge erg?nzen
         # cat("* ID = "); print (id)
         # cat("* Tfz Main = "); print (tfzMain)
-        trainList <- c(trainList, newTrain(id, listStations, tfzMain, tfzSub, numOfTfz, totLength, totWeight, prod, prodMain, trClass, stopPos, hasLZB, brh, tonRating, breaking, vMax, VTS_main, VTS_holiday, VZE_begin, VZE_end, ""))
+        trainList <- c(trainList, newTrain(id, listStations, tfzMain, tfzSub, numOfTfz, 
+                                           totLength, totWeight, prod, prodMain, trClass, 
+                                           stopPos, hasLZB, brh, tonRating, breaking, vMax, 
+                                           VTS_main, VTS_holiday, VZE_begin, VZE_end, 
+                                           AddDays, ExclDays, ""))
         # function(id,listOfStations, tfzMain, tfzSub, totalLength, totalWeight, product, trainClass, stopPosition, lzb, brh, tonnageRating, breakingSystem, maxVelocity)
       }
     }

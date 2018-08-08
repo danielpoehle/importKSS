@@ -24,44 +24,35 @@ setClass(
       vtsHoliday = "character",
       vzeBegin = "character",
       vzeEnd = "character",
+      additionalDays = "character",
+      excludeDays = "character",
       regionalB = "character"
       )
 )
 
-newT <- newTrain <- function(id,listOfStations, tfzMain, tfzSub, numOfTfz, totalLength, totalWeight, product, productMain, trainClass, stopPosition, lzb, brh, tonnageRating, breakingSystem, maxVelocity, vtsMain, vtsHoliday, vzeBegin, vzeEnd, regionalB){
-    new (Class="Train",id=id, listOfStations= listOfStations, tfzMain=tfzMain, tfzSub=tfzSub, numOfTfz=numOfTfz, totalLength=totalLength, totalWeight=totalWeight, product=product, productMain=productMain, trainClass=trainClass, stopPosition=stopPosition, lzb=lzb, brh=brh, tonnageRating=tonnageRating, breakingSystem=breakingSystem, maxVelocity=maxVelocity, vtsMain=vtsMain, vtsHoliday=vtsHoliday, vzeBegin = vzeBegin, vzeEnd = vzeEnd, regionalB = regionalB)
+newT <- newTrain <- function(id,listOfStations, tfzMain, tfzSub, numOfTfz, 
+                             totalLength, totalWeight, product, productMain, 
+                             trainClass, stopPosition, lzb, brh, tonnageRating, 
+                             breakingSystem, maxVelocity, vtsMain, vtsHoliday, 
+                             vzeBegin, vzeEnd, addDays, exclDays, regionalB){
+    new (Class="Train",id=id, listOfStations= listOfStations, tfzMain=tfzMain, 
+         tfzSub=tfzSub, numOfTfz=numOfTfz, totalLength=totalLength, totalWeight=totalWeight, 
+         product=product, productMain=productMain, trainClass=trainClass, 
+         stopPosition=stopPosition, lzb=lzb, brh=brh, tonnageRating=tonnageRating, 
+         breakingSystem=breakingSystem, maxVelocity=maxVelocity, vtsMain=vtsMain, 
+         vtsHoliday=vtsHoliday, vzeBegin = vzeBegin, vzeEnd = vzeEnd, 
+         additionalDays = addDays, excludeDays = exclDays, regionalB = regionalB)
 }
 
-decodeVts <- function(vts){
-    if(is.na(as.integer(vts))){return(data.frame(Mo = T, Tu = T, We = T, Th = T, Fr = T, Sa = T, Su = T))}
-    df <- data.frame(Mo = F, Tu = F, We = F, Th = F, Fr = F, Sa = F, Su = F)
-    if(vts / 64 >=1){
-        df$Mo <- TRUE
-        vts <- vts%%64
-    }
-    if(vts / 32 >=1){
-        df$Tu <- TRUE
-        vts <- vts%%32
-    }
-    if(vts / 16 >=1){
-        df$We <- TRUE
-        vts <- vts%%16
-    }
-    if(vts / 8 >=1){
-        df$Th <- TRUE
-        vts <- vts%%8
-    }
-    if(vts / 4 >=1){
-        df$Fr <- TRUE
-        vts <- vts%%4
-    }
-    if(vts / 2 >=1){
-        df$Sa <- TRUE
-        vts <- vts%%2
-    }
-    if(vts >=1){
-        df$Su <- TRUE
-    }
+decodeVts <- function(vts = "0000000"){
+  if(is.na(vts)){vts <- "0000000"}
+  tmpVTS <- strsplit(unlist(strsplit(vts, "#")), "")
+  df <- data.frame()
+  for(i in 1:length(tmpVTS)){
+    mtx <- matrix(tmpVTS[[i]] == "1", ncol = 7)
+    colnames(mtx) <- c("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
+    df <- rbind(df, as.data.frame(mtx, stringsAsFactors = F))
+  }
     df
 }
 
@@ -262,6 +253,22 @@ setMethod("getAllStations","Train",
           }
 )
 
+### Getter for "additionalDays"
+setGeneric("getAddDays",function(object){standardGeneric ("getAddDays")})
+setMethod("getAddDays","Train",
+          function(object){
+            return(object@additionalDays)            
+          }
+)
+
+### Getter for "excludeDays"
+setGeneric("getExcludeDays",function(object){standardGeneric ("getExcludeDays")})
+setMethod("getExcludeDays","Train",
+          function(object){
+            return(object@excludeDays)            
+          }
+)
+
 ### Getter for "non NA StationList in DS100 and Departure"
 setGeneric("getNonNAStationList",function(object){standardGeneric ("getNonNAStationList")})
 setMethod("getNonNAStationList","Train",
@@ -289,18 +296,62 @@ setMethod("getDepartureOfStation","Train",
 ### Getter for "Departure on Day x"
 setGeneric("departsOnDay",function(object,y,m,d){standardGeneric ("departsOnDay")})
 setMethod("departsOnDay","Train",
-          function(object,y,m,d){              
+          function(object,y,m,d){      
+            #start <- "2013-06-09#2013-11-02"
+            # end <- "2013-07-04#2013-11-30"
               actualday <- ymd(paste0(y, "-",m, "-",d))
-              start <- ymd(as.character(getVZEBegin(object)))
-              end <- ymd(as.character(getVZEEnd(object)))
+              start <- unlist(strsplit(getVZEBegin(object), "#"))
+              end <- unlist(strsplit(getVZEEnd(object), "#"))
+              start <- ymd(as.character(start))
+              end <- ymd(as.character(end))
               
-              if(actualday < start | actualday > end) {return(FALSE)}
+              addD <- ymd(as.character(unlist(strsplit(getAddDays(object), "#"))))
+              excD <- unlist(strsplit(getExcludeDays(object), "#"))
               
-              vtsFrame <- decodeVts(as.numeric(getVtsMain(object)))
-              weekd <- ifelse(wday(actualday)-1 == 0, 7, wday(actualday)-1)
+              intvl <- ""
+              for(i in 1:length(start)){
+                if(i == 1){
+                  intvl <- interval(start[i], end[i])
+                }else{
+                  intvl <- c(intvl, interval(start[i], end[i]))
+                }
+              }
               
-              if(as.logical(vtsFrame[weekd])){return(TRUE)}
-              return(FALSE)
+              if(!any(actualday %within% intvl)) {
+                # actual day ist not within VZE
+                if(any(addD == actualday)){
+                  #additional day is on actual day
+                  return(TRUE)
+                }
+                # additional days are not on actual day
+                return(FALSE)
+              }else{
+                # actual day ist within VZE
+                if(any(excD == actualday)){
+                  # actual day is excluded
+                  return(FALSE)
+                }else{
+                  # actual day is not excluded
+                  vtsFrame <- decodeVts(getVtsMain(object))
+                  weekd <- ifelse(wday(actualday)-1 == 0, 7, wday(actualday)-1)
+                  if(as.logical(vtsFrame[weekd])){
+                    # vts is valid on actual day
+                    return(TRUE)
+                  }else{
+                    # vts is not on actual day
+                    if(any(addD == actualday)){
+                      # actual day is not in vts but an additional day
+                      return(TRUE)
+                    }else{
+                      # actual day is not in vts and also not an additional day
+                      return(FALSE)
+                    }
+                    
+                    }
+                  
+                }
+              
+              }
           }
 )
 
@@ -328,6 +379,8 @@ setMethod ("print","Train",
                      cat("* VTSHoliday = "); print (getVtsHoliday(x))
                      cat("* VZEBegin = "); print (getVZEBegin(x))
                      cat("* VZEEnd = "); print (getVZEEnd(x))
+                     cat("* AddDays = "); print (getAddDays(x))
+                     cat("* ExcludeDays = "); print (getExcludeDays(x))
                      cat("* Regionalbereich = "); print (getRegionalB(x))
                      cat("*********************************** \n")
                    }else{}
@@ -343,7 +396,7 @@ setMethod("show","Train",
                     cat("* Anzahl Tfz = "); print (getNumOfTfz(object))
                     cat("* Erstes Tfz = "); print (getTfzMain(object))
                     cat("* Sub-Nr. = "); print (getTfzSub(object))
-                    cat("* Ges. L?nge = "); print (getTotalLength(object))
+                    cat("* Ges. Länge = "); print (getTotalLength(object))
                     cat("* Ges. Gewicht = "); print (getTotalWeight(object))
                     cat("* Produkt = "); print (getProduct(object))
                     cat("* Zuggatungshauptnummer = "); print (getProductMain(object))
@@ -358,6 +411,8 @@ setMethod("show","Train",
                     cat("* VTSHoliday = "); print (getVtsHoliday(object))
                     cat("* VZEBegin = "); print (getVZEBegin(object))
                     cat("* VZEEnd = "); print (getVZEEnd(object))
+                    cat("* AddDays = "); print (getAddDays(object))
+                    cat("* ExcludeDays = "); print (getExcludeDays(object))
                     cat("* Regionalbereich = "); print (getRegionalB(object))
                     cat("*********************************** \n")
                   }else{}
