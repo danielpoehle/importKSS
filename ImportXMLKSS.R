@@ -7,7 +7,7 @@ importXMLKSSFile <- function(fileName){
   trainList <- list()
   
   # Load XML into memory
-  text <- readLines(fileName)
+  text <- readLines(fileName, encoding="ISO-8859-1")
   if(any(grep(paste0("[", rawToChar(as.raw(c(1:8,10:31))), "]"), text))){
     print("Non-printable characters in file!")
     print(fileName)
@@ -20,17 +20,17 @@ importXMLKSSFile <- function(fileName){
   # get number of TrainPaths
   maxInd <- length(root[[3]][[1]])
   
-  # Iteration über alle Trassen i
+  # Iteration Ã¼ber alle Trassen i
   for(i in 2:maxInd){
     # cat("* Trasse i = "); print (i)
     constrTrainList <- root[[3]][[1]][[i]][[2]][names(root[[3]][[1]][[i]][[2]])=="constructionTrain"]
     connectionList <- root[[3]][[1]][[i]][[2]][names(root[[3]][[1]][[i]][[2]])=="connection"]
     
-    # Iteration über alle Konstruktionszüge j der Trasse i
+    # Iteration ?ber alle Konstruktionsz?ge j der Trasse i
     for(j in 1:length(constrTrainList)){
       
       # cat("* Zug j = "); print (j)
-      # nur Züge, die nicht Phantomzüge sind aufnehmen
+      # nur Z?ge, die nicht Phantomz?ge sind aufnehmen
       phantom <- xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["isPhantom"]])
       if(!is.na(phantom) & phantom == "false"){
         id <- paste(xmlValue(constrTrainList[j]$constructionTrain[["trainNumber"]][["mainNumber"]]), 
@@ -38,7 +38,7 @@ importXMLKSSFile <- function(fileName){
                     xmlValue(constrTrainList[j]$constructionTrain[["trainNumber"]][["userAbbreviation"]]), sep = "-")
         
         # Aufbau der stationList
-        # Iteration über alle Stationen k des Konstruktionszuges j in Trasse i
+        # Iteration ?ber alle Stationen k des Konstruktionszuges j in Trasse i
         listStations <- data.frame()
         #cat("* Zug = "); print (i)
         if(is.null(constrTrainList[j]$constructionTrain[["sequence"]][["sequenceServicePoints"]])){next}
@@ -66,7 +66,7 @@ importXMLKSSFile <- function(fileName){
         tfzMain <- xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["tractionUnits"]][[1]][["tractionUnitDesignSeries"]][["designSeries"]])
         tfzSub <- xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["tractionUnits"]][[1]][["tractionUnitDesignSeries"]][["variante"]])
         
-        # Gesamtlänge des Zuges
+        # Gesamtl?nge des Zuges
         totLength <- as.numeric(xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["totalLength"]]))
         
         # Gesamtmasse des Zuges
@@ -90,7 +90,7 @@ importXMLKSSFile <- function(fileName){
         # Bremshundertstel
         brh <- as.numeric(xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["brakedWeightPercentage"]]))
         
-        # Höchstgeschwindigkeit
+        # H?chstgeschwindigkeit
         vMax <- as.numeric(xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["maxVelocity"]]))
         
         # Tonnage Rating
@@ -100,16 +100,44 @@ importXMLKSSFile <- function(fileName){
         breaking <- xmlValue(constrTrainList[j]$constructionTrain[["characteristic"]][["brakingSystem"]])
         
         # VTS der Trasse und Verkehrszeitraum
-        desc <-xmlAttrs(constrTrainList[j]$constructionTrain[["services"]][["service"]])["description"]
-        VTS_main <- str_sub(desc[[1]], start = nchar(desc)-6, end = nchar(desc)-4)
-        if(grepl("\\.", VTS_main)){
-            VTS_main <- desc
-        }
-        VTS_holiday <- str_sub(desc[[1]], start = nchar(desc)-2, end = nchar(desc)-1)
-        VZE_begin <- xmlAttrs(constrTrainList[j]$constructionTrain[["services"]][["service"]])["startDate"][1]
-        VZE_end <- xmlAttrs(constrTrainList[j]$constructionTrain[["services"]][["service"]])["endDate"][1]
+        timeframes <- constrTrainList[j]$constructionTrain[["services"]]
+        desc <-xmlAttrs(timeframes[[1]])["description"]
+        VTS_main <- "#"
+        VZE_begin <- "#"
+        VZE_end <- "#"
         
-        # Liste der Konstruktionszüge ergänzen
+        for(m in 1:length(timeframes)){
+          beg <- xmlAttrs(timeframes[[m]])["startDate"]
+          ende <- xmlAttrs(timeframes[[m]])["endDate"]
+          for(v in 1:length(timeframes[[m]])){
+            if(xmlAttrs(timeframes[[m]][[v]])["dayType"] == "regularday"){
+              vt <- xmlAttrs(timeframes[[m]][[v]])["operatingCode"]
+              break()
+            }
+          }
+          if(VTS_main == "#"){
+            VTS_main <- vt
+          }else{
+            VTS_main <- paste(VTS_main, vt, sep = "#")
+          }
+          
+          if(VZE_begin == "#"){
+            VZE_begin <- beg
+          }else{
+            VZE_begin <- paste(VZE_begin, beg, sep = "#")
+          }
+          
+          if(VZE_end == "#"){
+            VZE_end <- ende
+          }else{
+            VZE_end <- paste(VZE_end, ende, sep = "#")
+          }
+           
+        }
+        
+        VTS_holiday <- str_sub(desc[[1]], start = nchar(desc)-2, end = nchar(desc)-1)
+        
+        # Liste der Konstruktionsz?ge erg?nzen
         # cat("* ID = "); print (id)
         # cat("* Tfz Main = "); print (tfzMain)
         trainList <- c(trainList, newTrain(id, listStations, tfzMain, tfzSub, numOfTfz, totLength, totWeight, prod, prodMain, trClass, stopPos, hasLZB, brh, tonRating, breaking, vMax, VTS_main, VTS_holiday, VZE_begin, VZE_end, ""))

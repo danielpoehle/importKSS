@@ -1,4 +1,4 @@
-setwd("D:/RFiles/XMLKSS")
+setwd("/home/daniel/Dokumente/importKSS/")
 source("ImportXMLKSS.R")
 
 fNames <- c("mitte", "nord", "ost", "süd",  "südost", "südwest", "west")
