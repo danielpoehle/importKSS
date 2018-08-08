@@ -1,7 +1,7 @@
 setwd("D:/RFiles/XMLKSS")
 source("ImportXMLKSS.R")
 
-fNames <- c("mitte", "nord", "ost", "süd",  "südost", "südwest", "west")
+fNames <- c("mitte", "nord", "ost", "sÃ¼d",  "sÃ¼dost", "sÃ¼dwest", "west")
 folderNames <- paste0("./KSS2013_46/", fNames,"/")
 
 for(i in 6:length(folderNames)){
@@ -88,7 +88,7 @@ for(i in 1:len){
     df$WAY[i] <- paste(st_list$Ds100, collapse = "#")
     df$ARR[i] <- paste(st_list$Arrival, collapse = "#")
     df$DEP[i] <- paste(st_list$Departure, collapse = "#")
-    df$STOPS[i] <- paste(apply(st_list[!is.na(st_list$Type), c(1,4,5)], 1, paste, collapse = "§"), collapse = "#")
+    df$STOPS[i] <- paste(apply(st_list[!is.na(st_list$Type), c(1,4,5)], 1, paste, collapse = "?"), collapse = "#")
     df$TOTALLENGTH[i] <- getTotalLength(completeDList[[i]])
     df$WEIGHT[i] <- getTotalWeight(completeDList[[i]])
     df$PRODUCT[i] <- getProduct(completeDList[[i]])
