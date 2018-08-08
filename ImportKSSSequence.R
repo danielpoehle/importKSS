@@ -81,7 +81,7 @@ for(i in 1:len){
     df$BrH[i] <- getBrH(completeDList[[i]])
     df$BREAKCLASS[i] <- getBreakingSystem(completeDList[[i]])
     df$VMAX[i] <- getMaxVelocity(completeDList[[i]])
-    df$VTSmain[i] <- getVtsMain(completeDList[[i]])
+    df$VTSmain[i] <- paste(getVTSMainNumber(completeDList[[i]]), collapse = "#")
     df$VTSholiday[i] <- getVtsHoliday(completeDList[[i]])
     df$VZEstart[i] <- getVZEBegin(completeDList[[i]])
     df$VZEend[i] <- getVZEEnd(completeDList[[i]])

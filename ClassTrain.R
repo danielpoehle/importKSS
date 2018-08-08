@@ -184,9 +184,18 @@ setMethod("getMaxVelocity","Train",
           }
 )
 
-### Getter for "VTSMain"
-setGeneric("getVtsMain",function(object){standardGeneric ("getVtsMain")})
-setMethod("getVtsMain","Train",
+### Getter for "VTSMainNumber"
+setGeneric("getVTSMainNumber",function(object){standardGeneric ("getVTSMainNumber")})
+setMethod("getVTSMainNumber","Train",
+          function(object){
+            vts <- decodeVts(getVtsBit(object))
+            return(apply(c(64, 32, 16, 8, 4, 2, 1) * vts, 1, sum))
+          }
+)
+
+### Getter for "VTSBit"
+setGeneric("getVtsBit",function(object){standardGeneric ("getVtsBit")})
+setMethod("getVtsBit","Train",
           function(object){
             return(object@vtsMain)
           }
@@ -332,7 +341,7 @@ setMethod("departsOnDay","Train",
                   return(FALSE)
                 }else{
                   # actual day is not excluded
-                  vtsFrame <- decodeVts(getVtsMain(object))
+                  vtsFrame <- decodeVts(getVtsBit(object))
                   weekd <- ifelse(wday(actualday)-1 == 0, 7, wday(actualday)-1)
                   if(as.logical(vtsFrame[weekd])){
                     # vts is valid on actual day
