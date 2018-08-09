@@ -308,7 +308,7 @@ setMethod("getDepartureOfStation","Train",
 setGeneric("departsOnDay",function(object,y,m,d){standardGeneric ("departsOnDay")})
 setMethod("departsOnDay","Train",
           function(object,y,m,d){      
-            #start <- "2013-08-19#2013-10-21#2013-06-09"
+            # start <- "2013-08-19#2013-10-21#2013-06-09"
             # end <- "2013-10-02#2013-12-14#2013-07-05"
             # addD <- ""
             # excD <- "2013-11-01"
@@ -345,7 +345,7 @@ setMethod("departsOnDay","Train",
                   return(FALSE)
                 }else{
                   # actual day is not excluded
-                  vtsFrame <- decodeVts(getVtsBit(object))
+                  vtsFrame <- decodeVts(getVtsBit(object))[which(actualday %within% intvl),]
                   weekd <- ifelse(wday(actualday)-1 == 0, 7, wday(actualday)-1)
                   if(as.logical(vtsFrame[weekd])){
                     # vts is valid on actual day
