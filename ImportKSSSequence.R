@@ -4,7 +4,7 @@ source("ImportXMLKSS.R")
 fNames <- c("mitte", "nord", "ost", "süd",  "südost", "südwest", "west")
 folderNames <- paste0("./KSS2013_46/", fNames,"/")
 
-for(i in 1:length(folderNames)){
+for(i in 6:length(folderNames)){
     print(fNames[i])
     fileList <- list.files(folderNames[i], full.names = TRUE, pattern = ".xml$")
     tempTrainList <- list()
@@ -57,7 +57,7 @@ df <- data.frame(ID = integer(len), MAIN = integer(len), TFZ  = integer(len),
                  VZEstart = integer(len), VZEend = integer(len), WAY = integer(len),
                  STOPS = integer(len), ARR = integer(len), DEP = integer(len))
 
-for(i in 1:len){
+for(i in 1:1000){
     print(i)
     df$ID[i] <- getId(completeDList[[i]])
     df$MAIN[i] <- getIdMain(completeDList[[i]])

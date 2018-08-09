@@ -34,14 +34,14 @@ newT <- newTrain <- function(id,listOfStations, tfzMain, tfzSub, numOfTfz,
                              totalLength, totalWeight, product, productMain, 
                              trainClass, stopPosition, lzb, brh, tonnageRating, 
                              breakingSystem, maxVelocity, vtsMain, vtsHoliday, 
-                             vzeBegin, vzeEnd, addDays, exclDays, regionalB){
+                             vzeBegin, vzeEnd, additionalDays, excludeDays, regionalB){
     new (Class="Train",id=id, listOfStations= listOfStations, tfzMain=tfzMain, 
          tfzSub=tfzSub, numOfTfz=numOfTfz, totalLength=totalLength, totalWeight=totalWeight, 
          product=product, productMain=productMain, trainClass=trainClass, 
          stopPosition=stopPosition, lzb=lzb, brh=brh, tonnageRating=tonnageRating, 
          breakingSystem=breakingSystem, maxVelocity=maxVelocity, vtsMain=vtsMain, 
          vtsHoliday=vtsHoliday, vzeBegin = vzeBegin, vzeEnd = vzeEnd, 
-         additionalDays = addDays, excludeDays = exclDays, regionalB = regionalB)
+         additionalDays = additionalDays, excludeDays = excludeDays, regionalB = regionalB)
 }
 
 decodeVts <- function(vts = "0000000"){
@@ -189,7 +189,7 @@ setGeneric("getVTSMainNumber",function(object){standardGeneric ("getVTSMainNumbe
 setMethod("getVTSMainNumber","Train",
           function(object){
             vts <- decodeVts(getVtsBit(object))
-            return(apply(c(64, 32, 16, 8, 4, 2, 1) * vts, 1, sum))
+            return(sprintf("%03d", apply(c(64, 32, 16, 8, 4, 2, 1) * vts, 1, sum)))
           }
 )
 
@@ -222,6 +222,22 @@ setGeneric("getVZEEnd",function(object){standardGeneric ("getVZEEnd")})
 setMethod("getVZEEnd","Train",
           function(object){
             return(object@vzeEnd)
+          }
+)
+
+### Getter for "additionalDays"
+setGeneric("getAddDays",function(object){standardGeneric ("getAddDays")})
+setMethod("getAddDays","Train",
+          function(object){
+            return(object@additionalDays)            
+          }
+)
+
+### Getter for "excludeDays"
+setGeneric("getExcludeDays",function(object){standardGeneric ("getExcludeDays")})
+setMethod("getExcludeDays","Train",
+          function(object){
+            return(object@excludeDays)            
           }
 )
 
@@ -262,21 +278,7 @@ setMethod("getAllStations","Train",
           }
 )
 
-### Getter for "additionalDays"
-setGeneric("getAddDays",function(object){standardGeneric ("getAddDays")})
-setMethod("getAddDays","Train",
-          function(object){
-            return(object@additionalDays)            
-          }
-)
 
-### Getter for "excludeDays"
-setGeneric("getExcludeDays",function(object){standardGeneric ("getExcludeDays")})
-setMethod("getExcludeDays","Train",
-          function(object){
-            return(object@excludeDays)            
-          }
-)
 
 ### Getter for "non NA StationList in DS100 and Departure"
 setGeneric("getNonNAStationList",function(object){standardGeneric ("getNonNAStationList")})
@@ -306,8 +308,10 @@ setMethod("getDepartureOfStation","Train",
 setGeneric("departsOnDay",function(object,y,m,d){standardGeneric ("departsOnDay")})
 setMethod("departsOnDay","Train",
           function(object,y,m,d){      
-            #start <- "2013-06-09#2013-11-02"
-            # end <- "2013-07-04#2013-11-30"
+            #start <- "2013-08-19#2013-10-21#2013-06-09"
+            # end <- "2013-10-02#2013-12-14#2013-07-05"
+            # addD <- ""
+            # excD <- "2013-11-01"
               actualday <- ymd(paste0(y, "-",m, "-",d))
               start <- unlist(strsplit(getVZEBegin(object), "#"))
               end <- unlist(strsplit(getVZEEnd(object), "#"))
@@ -384,7 +388,7 @@ setMethod ("print","Train",
                      cat("* TonnageRating = "); print (getTonnageRating(x))
                      cat("* Bremssystem = "); print (getBreakingSystem(x))
                      cat("* vMax = "); print (getMaxVelocity(x))
-                     cat("* VTSMain = "); print (getVtsMain(x))
+                     cat("* VTSMain = "); print (getVTSMainNumber(x))
                      cat("* VTSHoliday = "); print (getVtsHoliday(x))
                      cat("* VZEBegin = "); print (getVZEBegin(x))
                      cat("* VZEEnd = "); print (getVZEEnd(x))
@@ -416,7 +420,7 @@ setMethod("show","Train",
                     cat("* TonnageRating = "); print (getTonnageRating(object))
                     cat("* Bremssystem = "); print (getBreakingSystem(object))
                     cat("* vMax = "); print (getMaxVelocity(object))
-                    cat("* VTSMain = "); print (getVtsMain(object))
+                    cat("* VTSMain = "); print (getVTSMainNumber(object))
                     cat("* VTSHoliday = "); print (getVtsHoliday(object))
                     cat("* VZEBegin = "); print (getVZEBegin(object))
                     cat("* VZEEnd = "); print (getVZEEnd(object))
