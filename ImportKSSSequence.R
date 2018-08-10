@@ -57,7 +57,7 @@ df <- data.frame(ID = integer(len), MAIN = integer(len), TFZ  = integer(len),
                  VZEstart = integer(len), VZEend = integer(len), WAY = integer(len),
                  STOPS = integer(len), ARR = integer(len), DEP = integer(len))
 
-for(i in 1:1000){
+for(i in 1:len){
     print(i)
     df$ID[i] <- getId(completeDList[[i]])
     df$MAIN[i] <- getIdMain(completeDList[[i]])
