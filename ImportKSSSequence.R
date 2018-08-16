@@ -4,7 +4,7 @@ source("ImportXMLKSS.R")
 fNames <- c("mitte", "nord", "ost", "süd",  "südost", "südwest", "west")
 folderNames <- paste0("./KSS2013_46/", fNames,"/")
 
-for(i in 6:length(folderNames)){
+for(i in 7:length(folderNames)){
     print(fNames[i])
     fileList <- list.files(folderNames[i], full.names = TRUE, pattern = ".xml$")
     tempTrainList <- list()
@@ -59,7 +59,7 @@ df <- data.frame(ID = integer(len), MAIN = integer(len), TFZ  = integer(len),
 
 for(i in 1:len){
     print(i)
-    df$ID[i] <- getId(completeDList[[i]])
+    df$ID[i] <- getId_KSS(completeDList[[i]])
     df$MAIN[i] <- getIdMain(completeDList[[i]])
     df$TFZ[i] <- paste0(getTfzMain(completeDList[[i]]), "-", getTfzSub(completeDList[[i]]))
     df$NUM_TZF[i] <- getNumOfTfz(completeDList[[i]])
@@ -86,4 +86,4 @@ for(i in 1:len){
     df$VZEstart[i] <- getVZEBegin(completeDList[[i]])
     df$VZEend[i] <- getVZEEnd(completeDList[[i]])
 }
-write.csv2(df, file = "./KSS2013_46/KSS2013_46-Gesamtdeutschland_v04.csv", row.names = F)
+write.csv2(df, file = "./KSS2013_46/KSS2013_46-Gesamtdeutschland_v05.csv", row.names = F)

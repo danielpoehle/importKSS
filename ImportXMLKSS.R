@@ -113,9 +113,22 @@ importXMLKSSFile <- function(fileName){
           if(!is.na(beg)){
             ende <- xmlAttrs(timeframes[[m]])["endDate"]
             for(v in 1:length(timeframes[[m]])){
-              if(xmlAttrs(timeframes[[m]][[v]])["dayType"] == "regularday"){
+              if(!is.na(xmlAttrs(timeframes[[m]][[v]])["dayType"]) && xmlAttrs(timeframes[[m]][[v]])["dayType"] == "regularday"){
                 vt <- xmlAttrs(timeframes[[m]][[v]])["operatingCode"]
-                break()
+              }
+              if(!is.na(xmlAttrs(timeframes[[m]][[v]])["type"]) && xmlAttrs(timeframes[[m]][[v]])["type"] == "include"){
+                if(AddDays == ""){
+                  AddDays <- xmlAttrs(timeframes[[m]][[v]])["date"]
+                }else{
+                  AddDays <- paste(AddDays, xmlAttrs(timeframes[[m]][[v]])["date"], sep = "#")
+                }
+              }
+              if(!is.na(xmlAttrs(timeframes[[m]][[v]])["type"]) && xmlAttrs(timeframes[[m]][[v]])["type"] == "exclude"){
+                if(ExclDays == ""){
+                  ExclDays <- xmlAttrs(timeframes[[m]][[v]])["date"]
+                }else{
+                  ExclDays <- paste(ExclDays, xmlAttrs(timeframes[[m]][[v]])["date"], sep = "#")
+                }
               }
             }
             if(VTS_main == "#"){
@@ -158,6 +171,9 @@ importXMLKSSFile <- function(fileName){
         }
         
         VTS_holiday <- str_sub(desc[[1]], start = nchar(desc)-2, end = nchar(desc)-1)
+        if(grepl("\\.", VTS_holiday)){
+          VTS_holiday <- "00"
+        }
         
         # Liste der Konstruktionsz?ge erg?nzen
         # cat("* ID = "); print (id)

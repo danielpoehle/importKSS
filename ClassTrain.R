@@ -258,6 +258,16 @@ setMethod("setRegionalB","Train",
           }
 )
 
+### Getter for "id_KSS"
+setGeneric("getId_KSS",function(object){standardGeneric ("getId_KSS")})
+setMethod("getId_KSS","Train",
+          function(object){
+            return(paste0(getId(object), "-", getRegionalB(object)))
+          }
+)
+
+
+
 ### Getter for "ith Element of StationList"
 setGeneric("getIthStation",function(object,i){standardGeneric ("getIthStation")})
 setMethod("getIthStation","Train",

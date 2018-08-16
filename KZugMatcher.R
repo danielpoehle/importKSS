@@ -1,12 +1,12 @@
 setwd("/home/daniel/Dokumente/importKSS/")
 
-completeList <- read.csv2(file = "./KSS2013_46/KSS2013_46-Gesamtdeutschland_v04.csv", stringsAsFactors = F)
+completeList <- read.csv2(file = "./KSS2013_46/KSS2013_46-Gesamtdeutschland_v05.csv", stringsAsFactors = F)
 completeList <- completeList[completeList$RUN20131114,]
 which(completeList$FIRST == completeList$LAST)
 # filter all trains which have moer than 1 station
 completeList <- completeList[completeList$FIRST != completeList$LAST, ]
 
-sgv <- completeList$PROD_MAIN %in% c(seq(50,79,1), seq(-79,-50,1))
+sgv <- completeList$PROD_MAIN %in% c(seq(50,79,1), seq(-79,-76,1), seq(-74,-50,1), -36)
 completeList <- completeList[sgv,]
 
 trainNumbers <- unique(completeList$MAIN)
@@ -141,10 +141,10 @@ addTrains <- addTrains[which(addTrains != "FALSE")]
 doubleTrains <-  doubleTrainNumber[doubleTrainNumber != "FALSE"]
 
 df <- data.frame(TrainNumber = c(seq(1:length(addTrains)), 1000+seq(length(doubleTrains)), trainNumbers), connectingIDs = c(addTrains, doubleTrains, idList), stringsAsFactors = F)
-write.csv2(df, file = "./KSS2013_46/Connections_v08.csv", row.names = F)
+write.csv2(df, file = "./KSS2013_46/Connections_v10.csv", row.names = F)
 
-write.csv2(which(doubleTrainNumber == "TRUE"), file = "./KSS2013_46/DoubleTrainNumbers_v08.csv", row.names = F)
-write.csv2(which(loop), file = "./KSS2013_46/Loops_v08.csv", row.names = F)
+write.csv2(which(doubleTrainNumber == "TRUE"), file = "./KSS2013_46/DoubleTrainNumbers_v10.csv", row.names = F)
+write.csv2(which(loop), file = "./KSS2013_46/Loops_v10.csv", row.names = F)
 
 
 
