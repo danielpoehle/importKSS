@@ -41,9 +41,9 @@ for(i in 1:length(trainNumbers)){
         next()
     }
     ds_first <- tempFrame$FIRST
-    ds_first[grepl("\\s.$", tempFrame$FIRST)] <- gsub('.{1}$', '', tempFrame$FIRST[grepl("\\s.$", tempFrame$FIRST)])   
+    ds_first[grepl("\\s.$", tempFrame$FIRST)] <- gsub('.{1}$', '', tempFrame$FIRST[grepl("\\s.$", tempFrame$FIRST)])
     ds_last <- tempFrame$LAST
-    ds_last[grepl("\\s.$", tempFrame$LAST)] <- gsub('.{1}$', '', tempFrame$LAST[grepl("\\s.$", tempFrame$LAST)]) 
+    ds_last[grepl("\\s.$", tempFrame$LAST)] <- gsub('.{1}$', '', tempFrame$LAST[grepl("\\s.$", tempFrame$LAST)])
     first_id <- which(!(ds_first %in% ds_last) & ds_last %in% ds_first)
     first <- tempFrame[first_id,]
     last <- tempFrame[!(ds_last %in% ds_first) & ds_first %in% ds_last,]
@@ -88,13 +88,13 @@ for(i in 1:length(trainNumbers)){
               }
               c2 <- paste(c2, f2$ID[1], sep = "#")
             }
-            
+
             additionalTrainNumber[i] <- paste(additionalTrainNumber[i], c2, sep = "$")
             }
         }
     if(length(first$ID) >1){
             # more than one start
-            
+
             # Rangierfahrt durch Bahnhof mit Tochterbetriebsstelle
             s <- which(grepl("\\s.$", first$FIRST))
             if(length(s)==1){
@@ -109,7 +109,7 @@ for(i in 1:length(trainNumbers)){
                         c2 <- first$ID[2]
                         f2_id <- first_id[2]
                         f2 <- tempFrame[f2_id,]
-                        
+
                         while(ds_last[f2_id] %in% ds_first){
                           f2_id <- which(ds_first == ds_last[f2_id])
                           if(length(f2_id)>1){
@@ -151,15 +151,15 @@ for(i in 1:length(trainNumbers)){
     # take only the first train
     first_id <- first_id[1]
     chain <- first$ID[1]
-    
-    
+
+
     while(ds_last[first_id] %in% ds_first){
         first_id <- which(ds_first == ds_last[first_id])
         if(length(first_id)>1){
           # if two sucessors take the one with different destinaton to first
           first_id <- first_id[(ds_last[first_id] != ds_first[first_id][1])]
           if(length(first_id) > 1){
-            # if both sucessors have different destinations remove a dead end 
+            # if both sucessors have different destinations remove a dead end
             # if no dead end is there take the first sucessor
             if(length(first_id[ds_last[first_id] %in% ds_first])>0){
               first_id <- first_id[ds_last[first_id] %in% ds_first][1]
@@ -182,7 +182,7 @@ addTrains <- unlist(strsplit(additionalTrainNumber[which(additionalTrainNumber!=
 addTrains <- addTrains[which(addTrains != "FALSE")]
 doubleTrains <-  doubleTrainNumber[doubleTrainNumber != "FALSE"]
 
-##### check if all train numbers are still 
+##### check if all train numbers are still
 allIDs <- completeList$ID
 
 tmp <- (unlist(strsplit(idList, "#")))
@@ -219,14 +219,14 @@ write.csv2(missing, file = "./KSS2013_46/Missing_v11.csv", row.names = F)
 #         addTrains[i] <- "FALSE"
 #         print(paste("train", train$LAST, "first", first$FIRST))
 #     }
-#     
+#
 #     if(gsub('.{1}$', '', last$LAST) == gsub('.{1}$', '', train$FIRST) & nchar(train$LAST) == 5){
 #         df$connectingIDs[df$TrainNumber == main] <- paste(df$connectingIDs[df$TrainNumber == main], aTrain, sep = "#")
 #         addTrains[i] <- "FALSE"
 #         print(paste("last", last$LAST, "train", train$FIRST))
 #     }
 # }
-# 
+#
 # addTrains <- addTrains[which(addTrains != "FALSE")]
 
 
@@ -238,8 +238,43 @@ write.csv2(which(loop), file = "./KSS2013_46/Loops_v10.csv", row.names = F)
 
 write.csv2(circles, file = "./KSS2013_46/Single_v11.csv", row.names = F)
 
+#################### check if ascending order of departure times ################
 
 
+dep <- completeList[, c("ID", "DEP")]
+na_list <- ""
+for(i in 1:length(dep$ID)){
+  print(i)
+  dep$FIRST[i] <- unlist(strsplit(dep$DEP[i], "#"))[1]
+
+  ti <- unlist(strsplit(dep$FIRST[i], ":"))
+  hours <- as.numeric(ti[1])
+  if(is.na(hours)){
+    na_list <- paste(na_list, i, sep = "#")
+    dep$SECONDS[i] <- -1
+    next()
+  }
+  hours <- ifelse(hours >= 100, 24 + hours - 100, hours)
+  minutes <- as.numeric(ti[2])
+  dep$SECONDS[i] <- hours*3600 + minutes*60 + as.numeric(unlist(strsplit(ti[3], "\\."))[1])
+}
+
+
+for(i in 1:length(df$TrainNumber)){
+  conn_list <- unlist(strsplit(df$connectingIDs[i], "#"))
+  startTimes <- integer(0)
+  for(c in conn_list){
+    startTimes <- c(startTimes, dep$SECONDS[c == completeList$ID])
+  }
+  if(!is.unsorted(startTimes)){
+    df$SORTED[i] <- T
+  }else{
+    df$SORTED[i] <- F
+  }
+  df$TIMES[i] <- paste(startTimes, collapse = "#")
+}
+
+write.csv2(df, file = "./KSS2013_46/TimeSort_Connections_v11.csv", row.names = F)
 
 #################### check doubletten #########################
 
