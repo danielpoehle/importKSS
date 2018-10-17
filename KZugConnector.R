@@ -1,9 +1,9 @@
 setwd("/home/daniel/Dokumente/importKSS/")
 
-connections <- read.csv2(file = "./KSS2013_46/TimeSort_Connections_v11.csv", stringsAsFactors = F)
-trains <- read.csv2(file = "./KSS2013_46/CompleteSGVList_14-11_v11.csv", stringsAsFactors = F)
+connections <- read.csv2(file = "./KSS2013_46/Connections_v12_manuell.csv", stringsAsFactors = F)
+trains <- read.csv2(file = "./KSS2013_46/CompleteSGVList_14-11_v12.csv", stringsAsFactors = F)
 
-result = data.frame(ANFORDERUNGID  = integer(5966),  ANFORDERUNGNAME  = integer(5966),  FIRST_BTS  = integer(5966),  LAST_BTS  = integer(5966),  STARTZEIT  = integer(5966),  ZIELZEIT  = integer(5966),  TFZ  = integer(5966),  NUM_TFZ  = integer(5966),  TOTALLENGTH  = integer(5966),  TOTALWEIGHT  = integer(5966),  ZUGGATTUNGSHAUPTNR  = integer(5966),  PRODUCT  = integer(5966),  TRAINCLASS  = integer(5966),  LZB  = integer(5966),  BrH  = integer(5966),  BREAKCLASS  = integer(5966),  VMAX  = integer(5966),  VTSMAIN  = integer(5966),  VTSHOLIDAY  = integer(5966),  VZE_START  = integer(5966),  VZE_END  = integer(5966),  CHARARCTERISTIC_CHANGE  = integer(5966),  WAY  = integer(5966),  STOPS  = integer(5966),  ARR  = integer(5966),  DEP = integer(5966), stringsAsFactors = F)
+result = data.frame(ANFORDERUNGID  = integer(length(connections$TrainNumber)),  ANFORDERUNGNAME  = integer(length(connections$TrainNumber)),  FIRST_BTS  = integer(length(connections$TrainNumber)),  LAST_BTS  = integer(length(connections$TrainNumber)),  STARTZEIT  = integer(length(connections$TrainNumber)),  ZIELZEIT  = integer(length(connections$TrainNumber)),  TFZ  = integer(length(connections$TrainNumber)),  NUM_TFZ  = integer(length(connections$TrainNumber)),  TOTALLENGTH  = integer(length(connections$TrainNumber)),  TOTALWEIGHT  = integer(length(connections$TrainNumber)),  ZUGGATTUNGSHAUPTNR  = integer(length(connections$TrainNumber)),  PRODUCT  = integer(length(connections$TrainNumber)),  TRAINCLASS  = integer(length(connections$TrainNumber)),  LZB  = logical(length(connections$TrainNumber)),  BrH  = integer(length(connections$TrainNumber)),  BREAKCLASS  = integer(length(connections$TrainNumber)),  VMAX  = integer(length(connections$TrainNumber)),  VTSMAIN  = integer(length(connections$TrainNumber)),  VTSHOLIDAY  = integer(length(connections$TrainNumber)),  VZE_START  = integer(length(connections$TrainNumber)),  VZE_END  = integer(length(connections$TrainNumber)),  CHARARCTERISTIC_CHANGE  = integer(length(connections$TrainNumber)),  WAY  = integer(length(connections$TrainNumber)),  STOPS  = integer(length(connections$TrainNumber)),  ARR  = integer(length(connections$TrainNumber)),  DEP = integer(length(connections$TrainNumber)), stringsAsFactors = F)
 
 
 for(i in 1:length(connections$TrainNumber)){
@@ -107,4 +107,4 @@ for(i in 1:length(connections$TrainNumber)){
   }
 }
 
-write.csv2(result, file = "./KSS2013_46/Fahrlagen_14.11.2013_final_v11.csv", row.names = F)
+write.csv2(result, file = "./KSS2013_46/Fahrlagen_14.11.2013_final_v12.csv", row.names = F)
